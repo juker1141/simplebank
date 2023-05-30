@@ -19,7 +19,7 @@ jobs:
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: password
-          POSTGRES_DB: postgres
+          POSTGRES_DB: simple_bank
         ports:
           # Maps tcp port 5432 on service container to the host
           - 5432:5432
@@ -43,9 +43,6 @@ jobs:
           curl -L https://github.com/golang-migrate/migrate/releases/download/v4.16.0/migrate.linux-amd64.tar.gz | tar xvz
           sudo mv migrate /usr/bin/migrate
           which migrate
-
-      - name: Create postgres db
-        run: make createdb
 
       - name: Run migrations
         run: make migrateup
