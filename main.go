@@ -3,10 +3,11 @@ package main
 import (
 	"database/sql"
 	"log"
-	"simplebank/api"
-	"simplebank/util"
 
-	db "simplebank/db/sqlc"
+	"github.com/juker1141/simplebank/api"
+	"github.com/juker1141/simplebank/util"
+
+	db "github.com/juker1141/simplebank/db/sqlc"
 
 	_ "github.com/lib/pq"
 )
