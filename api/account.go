@@ -114,6 +114,11 @@ func (server *Server) updateAccount(ctx *gin.Context) {
 
 	account, err := server.store.UpdateAccount(ctx, arg)
 	if err != nil {
+		if err == sql.ErrNoRows {
+			ctx.JSON(http.StatusNotFound, errorResponse(err))
+			return
+		}
+
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
@@ -125,6 +130,10 @@ type deleteAccountRequest struct {
 	ID int64 `uri:"id" binding:"required,min=1"`
 }
 
+type DeleteAccountResponse struct {
+	Message string `json:"message"`
+}
+
 func (server *Server) deleteAccount(ctx *gin.Context) {
 	var req deleteAccountRequest
 	if err := ctx.ShouldBindUri(&req); err != nil {
@@ -134,9 +143,18 @@ func (server *Server) deleteAccount(ctx *gin.Context) {
 
 	err := server.store.DeleteAccount(ctx, req.ID)
 	if err != nil {
+		if err == sql.ErrNoRows {
+			ctx.JSON(http.StatusNotFound, errorResponse(err))
+			return
+		}
+
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
 
-	ctx.JSON(http.StatusOK, "Delete Account Success")
+	res := DeleteAccountResponse{
+		Message: "Delete Account Success",
+	}
+
+	ctx.JSON(http.StatusOK, res)
 }
