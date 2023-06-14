@@ -56,7 +56,7 @@ func TestCreateUser(t *testing.T) {
 		body gin.H
 		buildStubs func(store *mockdb.MockStore)
 		checkResponse func(recorder * httptest.ResponseRecorder)
-	}{
+	}{ 
 		{
 			name: "OK",
 			body: gin.H{
