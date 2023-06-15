@@ -180,7 +180,7 @@ func TestCreateUser(t *testing.T) {
 			store := mockdb.NewMockStore(ctrl)
 			tc.buildStubs(store)
 
-			server := NewServer(store)
+			server := newTestServer(t, store)
 			recorder := httptest.NewRecorder()
 
 			jsonData, err := json.Marshal(tc.body)
@@ -198,7 +198,7 @@ func TestCreateUser(t *testing.T) {
 
 func randomUser(t *testing.T) (user db.User, password string) {
 	password = util.RandomString(6)
-	hashedPassword, err := util.HashedPassword(password)
+	hashedPassword, err := util.HashPassword(password)
 	require.NoError(t, err)
 
 	return db.User{
