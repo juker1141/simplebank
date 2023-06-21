@@ -54,7 +54,7 @@ func TestCreateAccountAPI(t *testing.T) {
 			},
 		},
 		{
-			name: "UnthorizedUser",
+			name: "UnauthorizedUser",
 			arg: arg,
 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
 				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, "unauthorized_user", time.Minute)
