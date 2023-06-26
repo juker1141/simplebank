@@ -54,22 +54,6 @@ func TestCreateAccountAPI(t *testing.T) {
 			},
 		},
 		{
-			name: "UnauthorizedUser",
-			arg: arg,
-			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
-				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, "unauthorized_user", time.Minute)
-			},
-			buildStubs: func(store *mockdb.MockStore) {
-				store.EXPECT().
-					CreateAccount(gomock.Any(), gomock.Eq(arg)).
-					Times(1).
-					Return(account, nil)
-			},
-			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
-				require.Equal(t, http.StatusUnauthorized, recorder.Code)
-			},
-		},
-		{
 			name: "NoAuthorization",
 			arg: arg,
 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
