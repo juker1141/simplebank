@@ -1,0 +1,17 @@
+version: "3"
+services:
+  db:
+    container_name: postgres15
+    image: postgres:15.3-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      PGUSER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: postgres
+    ports:
+      - "5432:5432"
+
+networks:
+  bank-network:
+    driver: bridge
