@@ -1,7 +1,6 @@
 version: "3"
 services:
   postgres:
-    container_name: postgres15
     image: postgres:15.3-alpine
     restart: always
     environment:
