@@ -227,6 +227,22 @@ func TestLoginUser(t *testing.T) {
 			},
 		},
 		{
+			name: "UserNotFound",
+			body: gin.H{
+				"username": "NotFound",
+				"password": password,
+			},
+			buildStubs: func(store *mockdb.MockStore) {
+				store.EXPECT().
+					GetUser(gomock.Any(), gomock.Any()).
+					Times(1).
+					Return(db.User{}, sql.ErrNoRows)
+			},
+			checkResponse: func(recorder *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusNotFound, recorder.Code)
+			},
+		},
+		{
 			name: "IncorrectPassword",
 			body: gin.H{
 				"username": user.Username,
@@ -275,7 +291,7 @@ func TestLoginUser(t *testing.T) {
 		},
 	}
 
-	for i := range testCases {
+	for i := range testCases{
 		tc := testCases[i]
 
 		t.Run(tc.name, func(t *testing.T) {
