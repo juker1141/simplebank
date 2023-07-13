@@ -71,7 +71,7 @@ func randomUser(t *testing.T) (user db.User, password string) {
 	return
 } 
 
-func TestCreateUser(t *testing.T) {
+func TestCreateUserAPI(t *testing.T) {
 	user, password := randomUser(t)
 
 	testCases := []struct{
