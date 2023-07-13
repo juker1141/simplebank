@@ -18,6 +18,7 @@ import (
 	"github.com/juker1141/simplebank/api"
 	_ "github.com/juker1141/simplebank/doc/statik"
 	"github.com/juker1141/simplebank/gapi"
+	"github.com/juker1141/simplebank/mail"
 	"github.com/juker1141/simplebank/pb"
 	"github.com/juker1141/simplebank/util"
 	"github.com/juker1141/simplebank/worker"
@@ -56,7 +57,7 @@ func main() {
 
 	taskDistributor := worker.NewRedisTaskDistribtor(redisOpt)
 
-	go runTaskProcessor(redisOpt, store)
+	go runTaskProcessor(config, redisOpt, store)
 	go runGatewayServer(config, store,taskDistributor)
 	runGrpcServer(config, store,taskDistributor)
 	// runGinServer(config, store)
@@ -75,8 +76,9 @@ func runDBMigration(migrationURL string, dbSource string) {
 	log.Info().Msg("db migrated successfully")
 }
 
-func runTaskProcessor(redisOpt asynq.RedisClientOpt, store db.Store) {
-	taskProcessor := worker.NewRedisTaskProcessor(redisOpt, store)
+func runTaskProcessor(config util.Config, redisOpt asynq.RedisClientOpt, store db.Store) {
+	mailer := mail.NewGmailSender(config.EmailSenderName, config.EmailSenderAddress, config.EmailSenderPassword)
+	taskProcessor := worker.NewRedisTaskProcessor(redisOpt, store, mailer)
 
 	log.Info().Msg("start task processor")
 	err := taskProcessor.Start()
@@ -90,7 +92,9 @@ func runGrpcServer(config util.Config, store db.Store, taskDistributor worker.Ta
 	if err != nil {
 		log.Fatal().Err(err).Msg("cannot create server:")
 	}
-	grpcServer := grpc.NewServer()
+
+	grpcLogger := grpc.UnaryInterceptor(gapi.GrpcLogger)
+	grpcServer := grpc.NewServer(grpcLogger)
 	pb.RegisterSimpleBankServer(grpcServer, server)
 	reflection.Register(grpcServer)
 
@@ -148,7 +152,8 @@ func runGatewayServer(config util.Config, store db.Store, taskDistributor worker
 	}
 
 	log.Info().Msgf("start HTTP gateway server at %s", listener.Addr().String())
-	err = http.Serve(listener, mux)
+	handler := gapi.HttpLogger(mux)
+	err = http.Serve(listener, handler)
 	if err != nil {
 		log.Fatal().Err(err).Msg("cannot create HTTP gateway server:")
 	}

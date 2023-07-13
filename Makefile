@@ -4,13 +4,16 @@ network:
 	docker network create bank-network
 
 postgres:
-	docker-compose up -d
+	docker run --name postgres --network bank-network -p 5432:5432 -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=password -d postgres:15.3-alpine
+
+mysql:
+	docker run --name mysql8 -p 3306:3306 -e MYSQL_ROOT_PASSWORD=secret -d mysql:8
 
 createdb:
-	docker-compose exec -it db createdb --username=postgres --owner=postgres simple_bank
+	docker exec -it postgres createdb --username=postgres --owner=postgres simple_bank
 
 dropdb:
-	docker-compose exec -it db dropdb simple_bank
+	docker exec -it postgres dropdb simple_bank
 
 migrateup:
 	migrate -path db/migration -database "$(DB_URL)" -verbose up
@@ -24,6 +27,9 @@ migratedown:
 migratedown1:
 	migrate -path db/migration -database "$(DB_URL)" -verbose down 1
 
+new_migration:
+	migrate create -ext sql -dir db/migration -seq $(name)
+
 db_docs:
 	dbdocs build doc/db.dbml
 
@@ -34,13 +40,14 @@ sqlc:
 	sqlc generate
 
 test:
-	go test -v -cover ./...
+	go test -v -cover -short ./...
 
 server:
 	go run main.go
 
 mock:
 	mockgen -build_flags=--mod=mod -package mockdb -destination db/mock/store.go github.com/juker1141/simplebank/db/sqlc Store
+	mockgen -build_flags=--mod=mod -package mockwk -destination worker/mock/distributor.go github.com/juker1141/simplebank/worker TaskDistribtor
 
 proto:
 	rm -f pb/*.swagger.go
@@ -58,4 +65,4 @@ evans:
 redis:
 	docker run --name redis -p 6379:6379 -d redis:7-alpine
 
-.PHONY: postgres createdb dropdb migrateup migratedown migrateup1 migratedown1 db_docs db_schema sqlc test server mock proto evans redis
+.PHONY: postgres createdb dropdb migrateup migratedown migrateup1 migratedown1 db_docs db_schema sqlc test server mock proto evans redis new_migration

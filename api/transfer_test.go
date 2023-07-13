@@ -18,7 +18,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestCreateTransfer(t *testing.T) {
+func TestCreateTransferAPI(t *testing.T) {
 	amount := int64(10)
 
 	user1, _ := randomUser(t)
