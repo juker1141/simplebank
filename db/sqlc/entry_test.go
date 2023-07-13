@@ -2,7 +2,6 @@ package db
 
 import (
 	"context"
-	"database/sql"
 	"testing"
 	"time"
 
@@ -19,7 +18,7 @@ func createRandomEntry(t *testing.T) Entry  {
 		Amount: util.RandomEntryAmount(),
 	}
 
-	entry, err := testQueries.CreateEntry(context.Background(), arg)
+	entry, err := testStore.CreateEntry(context.Background(), arg)
 	require.NoError(t, err)
 	require.NotEmpty(t, entry)
 
@@ -38,7 +37,7 @@ func TestCreateEntry(t *testing.T) {
 
 func TestGetEntry(t *testing.T) {
 	entry1 := createRandomEntry(t)
-	entry2, err := testQueries.GetEntry(context.Background(), entry1.ID)
+	entry2, err := testStore.GetEntry(context.Background(), entry1.ID)
 	require.NoError(t, err)
 	require.NotEmpty(t, entry2)
 
@@ -57,7 +56,7 @@ func TestUpdateEntry(t *testing.T) {
 		Amount: util.RandomEntryAmount(),
 	}
 
-	entry2, err := testQueries.UpdateEntry(context.Background(), arg)
+	entry2, err := testStore.UpdateEntry(context.Background(), arg)
 	require.NoError(t, err)
 	require.NotEmpty(t, entry2)
 
@@ -73,12 +72,12 @@ func TestUpdateEntry(t *testing.T) {
 
 func TestDeleteEntry(t *testing.T) {
 	entry1 := createRandomEntry(t)
-	err := testQueries.DeleteEntry(context.Background(), entry1.ID)
+	err := testStore.DeleteEntry(context.Background(), entry1.ID)
 	require.NoError(t, err)
 
-	entry2, err := testQueries.GetEntry(context.Background(), entry1.ID)
+	entry2, err := testStore.GetEntry(context.Background(), entry1.ID)
 	require.Error(t, err)
-	require.EqualError(t, err, sql.ErrNoRows.Error())
+	require.EqualError(t, err, ErrRecordNotFound.Error())
 	require.Empty(t, entry2)
 }
 
@@ -92,7 +91,7 @@ func TestListEntries(t *testing.T) {
 		Offset: 5,
 	}
 
-	entries, err := testQueries.ListEntries(context.Background(), arg)
+	entries, err := testStore.ListEntries(context.Background(), arg)
 	require.NoError(t, err)
 	require.Len(t, entries, 5)
 
