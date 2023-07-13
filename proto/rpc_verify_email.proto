@@ -1,0 +1,16 @@
+// tell compiler use proto3 version
+syntax = "proto3";
+
+// like golang package to group proto code
+package pb;
+
+option go_package = "github.com/juker1141/simplebank/pb";
+
+message VerifyEmailRequest {
+  int64 email_id = 1;
+  string secret_code = 2;
+}
+
+message VerifyEmailResponse {
+  bool is_verified = 1;
+}
